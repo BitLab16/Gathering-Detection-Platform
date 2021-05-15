@@ -17,9 +17,9 @@ services:
       - "6001:6000"
 
   web-app:
-    image: bitlab16/web-app:develop
+  #  image: bitlab16/web-app:develop
     container_name: web-app_container
-    #build: ../web-app/.
+    build: ../web-app/.
     hostname: web-app
     networks:
       - kafka-net
@@ -29,9 +29,9 @@ services:
       - rest-api
 
   rest-api:
-    image: bitlab16/rest-service:develop
+    #image: bitlab16/rest-service:develop
     container_name: rest-api_container
-    #build: ../rest-service/.
+    build: ../rest-service/.
     hostname: rest-api
     networks:
       - kafka-net
@@ -43,9 +43,9 @@ services:
       - "5000:5000"
 
   simulatore:
-    image: bitlab16/simulation-service:develop
+  #  image: bitlab16/simulation-service:develop
     container_name: simulatore_container
-    #build: ../simulation-service/.
+    build: ../simulation-service/.
     hostname: simulatore
     networks:
       - kafka-net
@@ -61,36 +61,35 @@ services:
       - "6543:5432"
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:6.1.1
-    hostname: zookeeper
+    container_name: kafka-zookeeper
+    image: 'bitnami/zookeeper:3'
     networks:
       - kafka-net
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOO_MY_ID: 1
-      #ZOO_SERVERS: server.1=zookeeper:2888:3888
+    ports: 
+      - '2181:2181'
+    environment: 
+      - ALLOW_ANONYMOUS_LOGIN=yes  
     
   kafka1:
-    image: confluentinc/cp-kafka:6.1.0
-    hostname: kafka1
     container_name: kafka1
+    image: 'bitnami/kafka:2'
     networks:
       - kafka-net
-    ports:
+    ports: 
       - '9092:9092'
       - '19091:19091'
+      - '29094:29094'
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_LISTENERS: LISTENER_DOCKER_INTERNAL://:19091,LISTENER_DOCKER_EXTERNAL://:9092
-      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka1:19091,LISTENER_DOCKER_EXTERNAL://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=WARN"
-      KAFKA_LOG4J_ROOT_LOGLEVEL: WARN
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=LISTENER_EXT:PLAINTEXT,LISTENER_INT:PLAINTEXT,REMOTE_EXT:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=LISTENER_EXT://kafka1:9092,LISTENER_INT://kafka1:19091
+      - KAFKA_CFG_ADVERTISED_LISTENERS=LISTENER_EXT://localhost:9092,LISTENER_INT://kafka1:19091
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=LISTENER_INT
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_BROKER_ID=1
     depends_on:
-      - zookeeper
+      - zookeeper  
   
   kafdrop:
     image: obsidiandynamics/kafdrop

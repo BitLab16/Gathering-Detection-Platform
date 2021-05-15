@@ -17,9 +17,9 @@ services:
       - "6001:6000"
 
   web-app:
-    image: bitlab16/web-app:develop
+    image: bitlab16/web-app:master
     container_name: web-app_container
-    #build: ../web-app/.
+    build: ../web-app/.
     hostname: web-app
     networks:
       - kafka-net

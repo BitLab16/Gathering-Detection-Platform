@@ -20,7 +20,7 @@ services:
   web-app:
     image: bitlab16/web-app:latest
     container_name: web-app_container
-    #build: ../web-app/.
+    build: ../web-app/.
     hostname: web-app
     networks:
       - kafka-net
